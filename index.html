@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Button — Curious Pirate Games</title>
+<meta name="description" content="Press the button. Track every press. A Curious Pirate Games tool.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#191430; --card:#2b2350; --card-b:#241d45; --well:#1c1738; --line:#463b78;
+  --text:#f8f5ff; --muted:#c8bfea; --gold:#ffc94d; --coral:#ff6f7d; --mint:#58e6c6; --pink:#ec4fc9;
+  --r:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:
+    radial-gradient(900px 500px at 15% -10%, rgba(255,201,77,.13), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(236,79,201,.14), transparent 60%),
+    var(--bg);
+  color:var(--text); font-family:'Nunito',system-ui,sans-serif; font-weight:600;
+  font-size:17px; line-height:1.5; min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.fred{font-family:'Fredoka',system-ui,sans-serif;font-weight:600;letter-spacing:.2px}
+h2{font-size:24px;margin:0 0 10px} h3{font-size:19px;margin:18px 0 10px;color:var(--gold)}
+[hidden]{display:none!important}
+.wrap{max-width:860px;margin:0 auto;padding:14px 16px 70px}
+.muted{color:var(--muted)}
+.hint{color:var(--muted);font-size:15px;margin:0 0 10px}
+
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:4px 0 16px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;font-size:28px;
+  background:linear-gradient(145deg,#ffd76a,#ff9a2e);box-shadow:0 4px 0 #b9641a, 0 8px 20px rgba(0,0,0,.35);transform:rotate(-6deg)}
+.brand h1{margin:0;font-size:30px;line-height:1.05}
+.brand h1 span{color:var(--gold)}
+.sub{color:var(--muted);font-size:15px}
+
+.btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;border:0;border-radius:14px;padding:11px 18px;cursor:pointer;
+  background:#3a3070;color:var(--text);box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .08s,box-shadow .08s,filter .15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;-webkit-tap-highlight-color:transparent}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.gold{background:var(--gold);color:#2a1d00}
+.btn.mint{background:var(--mint);color:#04261f}
+.btn.coral{background:var(--coral);color:#2b0007}
+.btn.small{font-size:15px;min-height:38px;padding:7px 13px;border-radius:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.card{background:linear-gradient(180deg,var(--card),var(--card-b));border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+input[type=text],textarea{width:100%;background:var(--well);border:2px solid var(--line);color:var(--text);border-radius:12px;
+  padding:10px 12px;font:700 16px/1.4 'Nunito',sans-serif;outline:none}
+input[type=text]:focus,textarea:focus{border-color:var(--gold)}
+label.lbl{display:block;font-size:15px;color:var(--muted);margin:0 0 6px}
+
+/* the button */
+.press-zone{display:flex;flex-direction:column;align-items:center;text-align:center;padding:10px 0 4px}
+.press-name{font-family:'Fredoka';font-size:22px;margin:0 0 14px;color:var(--muted)}
+.big{position:relative;width:min(230px,62vw);aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%, #ffb3bb 0%, var(--coral) 38%, #d9344f 100%);
+  box-shadow:0 14px 0 #8f1830, 0 22px 40px rgba(0,0,0,.45), inset 0 -10px 24px rgba(0,0,0,.18), inset 0 8px 18px rgba(255,255,255,.28);
+  transition:transform .07s, box-shadow .07s; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  font-family:'Fredoka';font-weight:700;font-size:34px;color:#fff;text-shadow:0 2px 0 rgba(120,10,30,.5);letter-spacing:1px}
+.big:active,.big.down{transform:translateY(11px);box-shadow:0 3px 0 #8f1830, 0 8px 18px rgba(0,0,0,.45), inset 0 -6px 18px rgba(0,0,0,.2), inset 0 8px 18px rgba(255,255,255,.22)}
+.big:focus-visible{outline:4px solid var(--gold);outline-offset:6px}
+.plus{position:absolute;left:50%;top:10%;font-family:'Fredoka';font-weight:700;font-size:30px;color:var(--gold);pointer-events:none;
+  text-shadow:0 2px 6px rgba(0,0,0,.5);animation:rise .9s ease-out forwards}
+@keyframes rise{from{opacity:1;transform:translate(-50%,0) scale(1)}to{opacity:0;transform:translate(-50%,-90px) scale(1.3)}}
+.count{font-family:'Fredoka';font-weight:700;font-size:64px;line-height:1;margin:30px 0 4px;color:var(--gold)}
+.count.bump{animation:bump .25s}
+@keyframes bump{50%{transform:scale(1.12)}}
+.count-sub{color:var(--muted);font-size:16px}
+.press-actions{margin-top:14px;justify-content:center}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:640px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--well);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat small{display:block;color:var(--muted);font-size:14px;line-height:1.3}
+.stat b{display:block;font-family:'Fredoka';font-weight:600;font-size:24px;color:var(--text);line-height:1.25;word-break:break-word}
+.stat b.g{color:var(--gold)} .stat b.m{color:var(--mint)} .stat b.c{color:var(--coral)}
+.stat i{display:block;font-style:normal;color:var(--muted);font-size:13px}
+
+/* tabs / chart */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;background:var(--well);border:1px solid var(--line);border-radius:14px;padding:5px;width:fit-content}
+.tab{font-family:'Fredoka';font-weight:600;font-size:16px;border:0;background:transparent;color:var(--muted);padding:7px 13px;border-radius:10px;cursor:pointer;min-height:38px}
+.tab.on{background:var(--gold);color:#2a1d00}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+canvas.chart{width:100%;display:block;background:var(--well);border:1px solid var(--line);border-radius:14px}
+
+/* share */
+.gif-out{margin-top:12px;text-align:center}
+.gif-out img{max-width:100%;border-radius:14px;border:1px solid var(--line);display:block;margin:0 auto 10px}
+pre.discord{background:#1e1f22;color:#dbdee1;border:1px solid #3f4147;border-radius:10px;padding:12px;margin:0 0 10px;
+  font:14px/1.35 ui-monospace,Menlo,Consolas,monospace;white-space:pre;overflow-x:auto}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--mint);color:#04261f;
+  font-family:'Fredoka';font-weight:600;padding:10px 18px;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+details summary{cursor:pointer;font-family:'Fredoka';font-size:19px;color:var(--gold);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:' ▾';color:var(--muted)}
+details[open] summary::after{content:' ▴'}
+.sep{height:1px;background:var(--line);margin:16px 0}
+footer{text-align:center;color:var(--muted);font-size:14px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🔴</div>
+      <div><h1>The <span>Button</span></h1><div class="sub">A Curious Pirate Games tool</div></div>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="press-zone">
+      <p class="press-name" id="pressName">The Button</p>
+      <button class="big" id="big" aria-label="Press the button">PRESS</button>
+      <div class="count" id="count">0</div>
+      <div class="count-sub" id="countSub">No presses yet — go on.</div>
+      <div class="row press-actions">
+        <button class="btn small" id="undo" disabled>↩ Undo last press</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Stats</h2>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="card">
+    <div class="chart-head">
+      <h2 style="margin:0">Over time</h2>
+      <div class="tabs" id="modeTabs">
+        <button class="tab on" data-mode="bars">Presses</button>
+        <button class="tab" data-mode="total">Running total</button>
+      </div>
+    </div>
+    <div class="tabs" id="rangeTabs" style="margin-bottom:12px">
+      <button class="tab" data-range="24h">24h</button>
+      <button class="tab on" data-range="7d">7 days</button>
+      <button class="tab" data-range="30d">30 days</button>
+      <button class="tab" data-range="12w">12 weeks</button>
+      <button class="tab" data-range="all">All time</button>
+    </div>
+    <canvas class="chart" id="chart" height="250"></canvas>
+    <h3>When you press (by hour)</h3>
+    <canvas class="chart" id="hours" height="150"></canvas>
+  </section>
+
+  <section class="card">
+    <h2>Share</h2>
+    <p class="hint">Both use the range and view picked above.</p>
+    <h3 style="margin-top:4px">🎞️ Stats GIF</h3>
+    <div class="row"><button class="btn gold" id="makeGif">Make GIF</button></div>
+    <div class="gif-out" id="gifOut" hidden>
+      <img id="gifImg" alt="Animated stats GIF">
+      <div class="row" style="justify-content:center">
+        <button class="btn mint" id="shareGif">Share</button>
+        <button class="btn" id="dlGif">Download</button>
+      </div>
+      <p class="hint" style="margin-top:8px">If the buttons don't work here, long-press (or right-click) the GIF to save it.</p>
+    </div>
+    <div class="sep"></div>
+    <h3 style="margin-top:0">💬 Discord text</h3>
+    <pre class="discord" id="discord"></pre>
+    <div class="row"><button class="btn gold" id="copyDiscord">Copy for Discord</button></div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Settings &amp; backup</summary>
+      <div style="margin-top:14px">
+        <label class="lbl" for="nameIn">What's the button for? (shows on stats and shares)</label>
+        <input type="text" id="nameIn" maxlength="40" placeholder="The Button">
+        <div class="sep"></div>
+        <label class="lbl">Backup code — copy this to move to another device or keep safe</label>
+        <div class="row" style="margin-bottom:10px"><button class="btn small" id="copyBackup">Copy backup code</button></div>
+        <label class="lbl" for="restoreIn">Restore from a backup code (replaces what's here)</label>
+        <textarea id="restoreIn" rows="3" placeholder="Paste a backup code…"></textarea>
+        <div class="row" style="margin-top:8px"><button class="btn small mint" id="restore">Restore</button></div>
+        <div class="sep"></div>
+        <button class="btn small coral" id="reset">Reset all presses</button>
+      </div>
+    </details>
+  </section>
+
+  <footer>Curious Pirate Games · saved on this device only</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const C = {bg:'#191430',card:'#2b2350',well:'#1c1738',line:'#463b78',text:'#f8f5ff',muted:'#c8bfea',
+  gold:'#ffc94d',coral:'#ff6f7d',mint:'#58e6c6',pink:'#ec4fc9',btn:'#3a3070'};
+const DAY = 864e5, HOUR = 36e5;
+
+/* ---------- storage (scoped to page path; never wiped on bad data) ---------- */
+const KEY = 'cpg_button_v1:' + location.pathname;
+let state = {v:1, name:'The Button', presses:[]};
+function load(){
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch(e){}
+  if (!raw) return;
+  try {
+    const o = JSON.parse(raw);
+    if (o && Array.isArray(o.presses)) {
+      state.name = typeof o.name==='string' && o.name.trim() ? o.name : 'The Button';
+      state.presses = o.presses.filter(n => typeof n==='number' && isFinite(n)).sort((a,b)=>a-b);
+    }
+  } catch(e){ try { localStorage.setItem(KEY+':broken-'+Date.now(), raw); } catch(_){} }
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+/* ---------- time helpers ---------- */
+const sod = t => { const d=new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+const addDays = (t,n) => { const d=new Date(t); d.setDate(d.getDate()+n); return d.getTime(); };
+const sow = t => { const d=new Date(sod(t)); const wd=(d.getDay()+6)%7; d.setDate(d.getDate()-wd); return d.getTime(); };
+const som = t => { const d=new Date(t); d.setHours(0,0,0,0); d.setDate(1); return d.getTime(); };
+const addMonths = (t,n) => { const d=new Date(t); d.setMonth(d.getMonth()+n); return d.getTime(); };
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtN = n => Math.round(n).toLocaleString('en-GB');
+const fmtDate = t => { const d=new Date(t); return d.getDate()+' '+MO[d.getMonth()]+' '+d.getFullYear(); };
+const fmtShort = t => { const d=new Date(t); return d.getDate()+' '+MO[d.getMonth()]; };
+const fmtHour = h => (h%12||12) + (h<12?'am':'pm');
+function fmtDur(ms){
+  if (ms < 6e4) return Math.max(1,Math.round(ms/1000))+'s';
+  if (ms < HOUR) return Math.round(ms/6e4)+'m';
+  if (ms < DAY) { const h=Math.floor(ms/HOUR), m=Math.round((ms%HOUR)/6e4); return h+'h'+(m?' '+m+'m':''); }
+  const d=Math.floor(ms/DAY), h=Math.round((ms%DAY)/HOUR); return d+'d'+(h?' '+h+'h':'');
+}
+function ago(t){ const ms=Date.now()-t; return ms<45e3 ? 'just now' : fmtDur(ms)+' ago'; }
+
+/* ---------- stats ---------- */
+function countBetween(a,b){ // presses with a <= t < b (presses sorted)
+  const p=state.presses; let lo=0,hi=p.length; while(lo<hi){const m=(lo+hi)>>1; if(p[m]<a) lo=m+1; else hi=m;}
+  let i=lo, n=0; while(i<p.length && p[i]<b){n++;i++;} return n;
+}
+function computeStats(){
+  const p=state.presses, n=p.length, now=Date.now(), today=sod(now);
+  const s={total:n, today:countBetween(today,addDays(today,1)), week:countBetween(addDays(today,-6),addDays(today,1))};
+  if (!n) return s;
+  const days=new Map(), hours=new Array(24).fill(0);
+  for (const t of p){ const k=sod(t); days.set(k,(days.get(k)||0)+1); hours[new Date(t).getHours()]++; }
+  s.first=p[0]; s.last=p[n-1];
+  const spanDays = Math.max(1, Math.round((today - sod(p[0]))/DAY) + 1);
+  s.avg = n/spanDays; s.activeDays = days.size;
+  let best=0,bestDay=0; for (const [k,v] of days) if (v>best || (v===best && k>bestDay)){best=v;bestDay=k;}
+  s.bestDay=bestDay; s.bestDayN=best;
+  let ph=0; for (let h=1;h<24;h++) if (hours[h]>hours[ph]) ph=h; s.peakHour=ph; s.hours=hours;
+  // streaks
+  let cur=0, d=days.has(today)?today:addDays(today,-1);
+  while(days.has(d)){cur++; d=addDays(d,-1);} s.streak=cur;
+  const keys=[...days.keys()].sort((a,b)=>a-b); let run=0,bs=0,prev=null;
+  for (const k of keys){ run = (prev!==null && addDays(prev,1)===k) ? run+1 : 1; if(run>bs) bs=run; prev=k; }
+  s.bestStreak=bs;
+  if (n>1){ let lg=0; for(let i=1;i<n;i++) lg=Math.max(lg,p[i]-p[i-1]); s.longGap=lg; s.avgGap=(p[n-1]-p[0])/(n-1); }
+  return s;
+}
+
+/* ---------- buckets for charts ---------- */
+const RANGE_LABEL = {'24h':'Last 24 hours','7d':'Last 7 days','30d':'Last 30 days','12w':'Last 12 weeks','all':'All time'};
+function buckets(range){
+  const now=Date.now(), today=sod(now), out=[];
+  const push=(a,b,label,short,cur)=>out.push({a,b,label,short,cur,n:countBetween(a,b)});
+  if (range==='24h'){
+    const h0=new Date(now); h0.setMinutes(0,0,0); const end=h0.getTime()+HOUR;
+    for(let i=23;i>=0;i--){ const a=end-(i+1)*HOUR, hr=new Date(a).getHours(); push(a,a+HOUR,fmtHour(hr),fmtHour(hr).padStart(4),i===0); }
+    return out;
+  }
+  let unit='day', count=7;
+  if (range==='30d') count=30;
+  else if (range==='12w'){unit='week';count=12;}
+  else if (range==='all'){
+    const first = state.presses.length ? state.presses[0] : now;
+    const spanD = Math.round((today-sod(first))/DAY)+1;
+    if (spanD<=31){unit='day';count=Math.max(7,spanD);}
+    else if (spanD<=26*7){unit='week';count=Math.round((sow(now)-sow(first))/(7*DAY))+1;}
+    else {unit='month'; const a=new Date(first),b=new Date(now); count=(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()+1;}
+  }
+  if (unit==='day') for(let i=count-1;i>=0;i--){ const a=addDays(today,-i), d=new Date(a);
+    push(a,addDays(a,1), count<=7?WD[d.getDay()]:String(d.getDate()), WD[d.getDay()]+' '+String(d.getDate()).padStart(2,'0'), i===0); }
+  if (unit==='week'){ const w0=sow(now); for(let i=count-1;i>=0;i--){ const a=addDays(w0,-7*i); push(a,addDays(a,7),fmtShort(a),fmtShort(a).padStart(6),i===0);} }
+  if (unit==='month'){ const m0=som(now); for(let i=count-1;i>=0;i--){ const a=addMonths(m0,-i), d=new Date(a);
+    push(a,addMonths(a,1),MO[d.getMonth()],MO[d.getMonth()]+' '+String(d.getFullYear()).slice(2),i===0);} }
+  return out;
+}
+
+/* ---------- chart drawing (shared by page + GIF) ---------- */
+function niceStep(max, target){ const raw=max/target, p=Math.pow(10,Math.floor(Math.log10(raw))); const f=raw/p;
+  return Math.max(1,(f<=1?1:f<=2?2:f<=5?5:10)*p); }
+function rr(ctx,x,y,w,h,r){ r=Math.max(0,Math.min(r,w/2,h/2)); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+const ease = t => 1-Math.pow(1-t,3);
+function drawChart(ctx, X, Y, W, H, bk, mode, t, fs){
+  const n=bk.length;
+  let vals = bk.map(b=>b.n);
+  if (mode==='total'){ let run=countBetween(-Infinity,bk[0].a); vals=vals.map(v=>run+=v); }
+  const max=Math.max(...vals,0);
+  const padL=fs*2.6, padB=fs*1.9, padT=fs*1.5, padR=fs*0.6;
+  const px=X+padL, py=Y+padT, pw=W-padL-padR, ph=H-padT-padB;
+  ctx.textBaseline='middle';
+  if (max===0){
+    ctx.fillStyle=C.muted; ctx.font=`700 ${fs*1.1}px Nunito, sans-serif`; ctx.textAlign='center';
+    ctx.fillText('No presses in this range yet', X+W/2, Y+H/2); return;
+  }
+  const step=niceStep(max,3.5), top=Math.ceil(max/step)*step;
+  ctx.font=`700 ${fs*0.85}px Nunito, sans-serif`; ctx.textAlign='right';
+  for(let v=0; v<=top+1e-9; v+=step){
+    const yy=Math.round(py+ph-(v/top)*ph)+0.5;
+    ctx.strokeStyle=C.line; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(px,yy); ctx.lineTo(px+pw,yy); ctx.stroke();
+    ctx.fillStyle=C.muted; ctx.fillText(v>=1000?(v/1000)+'k':String(v), px-fs*0.45, yy);
+  }
+  const bw=pw/n;
+  // x labels
+  const maxLabels=Math.max(2,Math.floor(pw/(fs*3.2))), every=Math.ceil(n/maxLabels);
+  ctx.textAlign='center'; ctx.font=`700 ${fs*0.8}px Nunito, sans-serif`;
+  for(let i=0;i<n;i++){ if ((n-1-i)%every) continue;
+    ctx.fillStyle = bk[i].cur ? C.gold : C.muted; ctx.fillText(bk[i].label, px+bw*(i+.5), py+ph+padB*0.55); }
+  if (mode==='bars'){
+    const w=Math.max(2,bw*0.68);
+    for(let i=0;i<n;i++){
+      const pr=ease(Math.max(0,Math.min(1,t*1.5-(i/n)*0.5)));
+      const h=(vals[i]/top)*ph*pr; if (h<=0) continue;
+      const x=px+bw*i+(bw-w)/2;
+      ctx.fillStyle = bk[i].cur ? C.coral : C.gold;
+      rr(ctx,x,py+ph-h,w,h+2,Math.min(6,w/2)); ctx.fill();
+      if (n<=14 && pr>0.98){ ctx.fillStyle=C.text; ctx.font=`700 ${fs*0.8}px Fredoka, sans-serif`;
+        ctx.fillText(fmtN(vals[i]), x+w/2, py+ph-h-fs*0.7); }
+    }
+  } else {
+    const pts=vals.map((v,i)=>[px+bw*(i+.5), py+ph-(v/top)*ph*ease(Math.min(1,t*1.2))]);
+    const upto=Math.max(1, Math.ceil(n*Math.min(1,t*1.25)));
+    ctx.beginPath(); ctx.moveTo(pts[0][0],py+ph);
+    for(let i=0;i<upto;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+    ctx.lineTo(pts[upto-1][0],py+ph); ctx.closePath(); ctx.fillStyle='rgba(255,201,77,.18)'; ctx.fill();
+    ctx.beginPath(); for(let i=0;i<upto;i++) i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]);
+    ctx.strokeStyle=C.gold; ctx.lineWidth=Math.max(2,fs*0.2); ctx.lineJoin='round'; ctx.stroke();
+    const last=pts[upto-1]; ctx.fillStyle=C.coral; ctx.beginPath(); ctx.arc(last[0],last[1],fs*0.35,0,Math.PI*2); ctx.fill();
+    if (upto===n){ ctx.fillStyle=C.text; ctx.font=`700 ${fs*0.9}px Fredoka, sans-serif`; ctx.textAlign='right';
+      ctx.fillText(fmtN(vals[n-1]), Math.min(last[0], px+pw), Math.max(py-fs*0.6, last[1]-fs*0.9)); }
+  }
+}
+function drawHours(ctx,X,Y,W,H,hours,fs){
+  const max=Math.max(...hours,0), padB=fs*1.7, ph=H-padB-fs*0.6, bw=W/24;
+  ctx.textBaseline='middle'; ctx.textAlign='center';
+  if(!max){ ctx.fillStyle=C.muted; ctx.font=`700 ${fs}px Nunito, sans-serif`; ctx.fillText('No presses yet',X+W/2,Y+H/2); return; }
+  for(let h=0;h<24;h++){ const v=hours[h], bh=Math.max(v?3:1,(v/max)*ph), x=X+bw*h+bw*0.15;
+    ctx.fillStyle = v===max ? C.mint : (v ? C.pink : C.line); rr(ctx,x,Y+fs*0.6+ph-bh,bw*0.7,bh,Math.min(4,bw*0.3)); ctx.fill(); }
+  ctx.fillStyle=C.muted; ctx.font=`700 ${fs*0.8}px Nunito, sans-serif`;
+  for (const h of [0,6,12,18]) ctx.fillText(fmtHour(h), X+bw*(h+.5), Y+H-padB*0.45);
+}
+
+/* ---------- page rendering ---------- */
+let range='7d', mode='bars', anim=null;
+function sizeCanvas(cv){ const dpr=Math.min(3,window.devicePixelRatio||1), w=cv.clientWidth; if(!cv.dataset.h) cv.dataset.h=cv.getAttribute('height'); const h=+cv.dataset.h;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.height=h+'px'; const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return [ctx,w,h]; }
+function renderChart(animate){
+  const cv=$('#chart'); const bk=buckets(range);
+  cancelAnimationFrame(anim);
+  const start=performance.now(), dur=animate?650:0;
+  const frame=now=>{ const [ctx,w,h]=sizeCanvas(cv); ctx.clearRect(0,0,w,h);
+    const t=dur?Math.min(1,(now-start)/dur):1; drawChart(ctx,6,6,w-12,h-12,bk,mode,t,14);
+    if(t<1) anim=requestAnimationFrame(frame); };
+  animate ? anim=requestAnimationFrame(frame) : frame(performance.now());
+  const hc=$('#hours'); const [hx,hw,hh]=sizeCanvas(hc); hx.clearRect(0,0,hw,hh);
+  drawHours(hx,10,4,hw-20,hh-8,computeStats().hours||new Array(24).fill(0),14);
+}
+function renderStats(){
+  const s=computeStats();
+  $('#pressName').textContent=state.name;
+  $('#count').textContent=fmtN(s.total);
+  $('#countSub').textContent = s.total ? `${fmtN(s.today)} today · last press ${ago(s.last)}` : 'No presses yet — go on.';
+  $('#undo').disabled=!s.total;
+  const tile=(label,val,cls='',note='')=>`<div class="stat"><small>${label}</small><b class="${cls}">${val}</b>${note?`<i>${note}</i>`:''}</div>`;
+  const d='—';
+  $('#stats').innerHTML = [
+    tile('Total presses', fmtN(s.total),'g'),
+    tile('Today', fmtN(s.today)),
+    tile('Last 7 days', fmtN(s.week)),
+    tile('Daily average', s.total? (s.avg<10? s.avg.toFixed(1): fmtN(s.avg)) : d),
+    tile('Current streak', s.total? s.streak+' day'+(s.streak===1?'':'s') : d,'m'),
+    tile('Best streak', s.total? s.bestStreak+' day'+(s.bestStreak===1?'':'s') : d),
+    tile('Busiest day', s.total? fmtN(s.bestDayN):d,'c', s.total? fmtDate(s.bestDay):''),
+    tile('Peak hour', s.total? fmtHour(s.peakHour)+'–'+fmtHour((s.peakHour+1)%24) : d),
+    tile('Average gap', s.avgGap? fmtDur(s.avgGap):d),
+    tile('Longest gap', s.longGap? fmtDur(s.longGap):d),
+    tile('Active days', s.total? fmtN(s.activeDays):d),
+    tile('First press', s.total? fmtDate(s.first):d),
+  ].join('');
+  $('#discord').textContent = discordText();
+}
+function renderAll(animate){ renderStats(); renderChart(animate); }
+
+/* ---------- pressing ---------- */
+function press(){
+  state.presses.push(Date.now()); save();
+  try{ navigator.vibrate && navigator.vibrate(15); }catch(e){}
+  const big=$('#big'); const p=document.createElement('span'); p.className='plus'; p.textContent='+1'; big.appendChild(p);
+  setTimeout(()=>p.remove(),900);
+  const c=$('#count'); c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
+  renderAll(false);
+}
+$('#big').addEventListener('click', press);
+$('#undo').addEventListener('click', ()=>{ if(!state.presses.length) return; state.presses.pop(); save(); renderAll(false); toast('Last press removed'); });
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('#rangeTabs .tab').forEach(b=>b.addEventListener('click',()=>{
+  range=b.dataset.range; document.querySelectorAll('#rangeTabs .tab').forEach(x=>x.classList.toggle('on',x===b)); renderStats(); renderChart(true); }));
+document.querySelectorAll('#modeTabs .tab').forEach(b=>b.addEventListener('click',()=>{
+  mode=b.dataset.mode; document.querySelectorAll('#modeTabs .tab').forEach(x=>x.classList.toggle('on',x===b)); renderStats(); renderChart(true); }));
+let rz; window.addEventListener('resize',()=>{clearTimeout(rz); rz=setTimeout(()=>renderChart(false),120);});
+setInterval(()=>renderStats(), 30000);
+
+/* ---------- Discord text ---------- */
+function discordText(){
+  const s=computeStats(), Wd=30;
+  const line=c=>c.repeat(Wd);
+  const row=(l,r='')=>{ const sp=Wd-2-l.length-r.length; return '║ '+l+' '.repeat(Math.max(1,sp))+r+' ║'; };
+  const head=t=>{ const x='══ '+t+' '; return '╠'+x+'═'.repeat(Math.max(0,Wd-x.length))+'╣'; };
+  const ttl = /^[\x20-\x7e]{1,20}$/.test(state.name) ? state.name.toUpperCase() : 'THE BUTTON';
+  const L=['╔'+line('═')+'╗', row(ttl+' · STATS'), head('Totals')];
+  L.push(row('Total presses', fmtN(s.total)));
+  L.push(row('Today', fmtN(s.today)));
+  L.push(row('Last 7 days', fmtN(s.week)));
+  if (s.total){
+    L.push(row('Daily average', s.avg<10?s.avg.toFixed(1):fmtN(s.avg)));
+    L.push(row('Current streak', s.streak+'d'));
+    L.push(row('Best streak', s.bestStreak+'d'));
+    L.push(row('Busiest day', fmtN(s.bestDayN)+' ('+fmtShort(s.bestDay)+')'));
+    L.push(row('Peak hour', fmtHour(s.peakHour)));
+  }
+  let bk=buckets(range); if (bk.length>12) bk=bk.slice(-12);
+  let vals=bk.map(b=>b.n);
+  if (mode==='total'){ let run=countBetween(-Infinity,bk[0].a); vals=vals.map(v=>run+=v); }
+  const max=Math.max(...vals,0);
+  const title = (bk.length<buckets(range).length ? 'Last '+bk.length+' ' + (range==='24h'?'hours':'bars') : RANGE_LABEL[range]) + (mode==='total'?' (total)':'');
+  L.push(head(title));
+  const BW=13;
+  for (let i=0;i<bk.length;i++){
+    const f = max? Math.round(vals[i]/max*BW) : 0;
+    const bar='█'.repeat(f)+'░'.repeat(BW-f);
+    const lab=bk[i].short.padEnd(6).slice(0,6);
+    L.push(row(lab+' '+bar, fmtN(vals[i])));
+  }
+  L.push('╚'+line('═')+'╝');
+  const nm = state.name && state.name!=='The Button' ? state.name : 'The Button';
+  return `**🔴 ${nm}** — ${fmtN(s.total)} presses\n\`\`\`\n${L.join('\n')}\n\`\`\``;
+}
+$('#copyDiscord').addEventListener('click',()=>copy(discordText(),'Copied — paste it into Discord'));
+
+/* ---------- GIF encoder (palette + LZW, no libraries) ---------- */
+function hex(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function buildPalette(){
+  const bases=[C.bg,C.card,C.well].map(hex);
+  const fgs=[C.text,C.muted,C.gold,C.coral,C.mint,C.pink,C.line,C.btn].map(hex);
+  const pal=[...bases, ...fgs], seen=new Set(pal.map(c=>c.join()));
+  const add=c=>{ const k=c.join(); if(!seen.has(k)&&pal.length<256){seen.add(k);pal.push(c);} };
+  for (const b of bases) for (const f of fgs) for (let k=1;k<=7;k++){ const t=k/8; add(b.map((v,i)=>Math.round(v+(f[i]-v)*t))); }
+  // gold-over-coral/mint etc. for overlaps
+  while(pal.length<256) pal.push([0,0,0]);
+  return pal;
+}
+function indexFrame(img, pal, cache){
+  const d=img.data, out=new Uint8Array(d.length/4);
+  for (let i=0,j=0;i<d.length;i+=4,j++){
+    const key=(d[i]<<16)|(d[i+1]<<8)|d[i+2]; let ix=cache.get(key);
+    if (ix===undefined){ let best=1e9; ix=0;
+      for (let p=0;p<pal.length;p++){ const c=pal[p], dr=d[i]-c[0], dg=d[i+1]-c[1], db=d[i+2]-c[2];
+        const dist=dr*dr*2+dg*dg*4+db*db*3; if(dist<best){best=dist;ix=p;} }
+      cache.set(key,ix); }
+    out[j]=ix;
+  }
+  return out;
+}
+function lzw(ix){
+  const MIN=8, CLEAR=256, EOI=257; let size=MIN+1, next=258; const dict=new Map();
+  const bytes=[]; let cur=0, bits=0;
+  const emit=c=>{ cur|=c<<bits; bits+=size; while(bits>=8){ bytes.push(cur&255); cur>>>=8; bits-=8; } };
+  emit(CLEAR);
+  let prefix=ix[0];
+  for (let i=1;i<ix.length;i++){
+    const k=ix[i], key=prefix*256+k, v=dict.get(key);
+    if (v!==undefined){ prefix=v; continue; }
+    emit(prefix);
+    if (next<4096){ dict.set(key,next++); if (next>(1<<size) && size<12) size++; }
+    else { emit(CLEAR); dict.clear(); size=MIN+1; next=258; }
+    prefix=k;
+  }
+  emit(prefix);
+  if (next===(1<<size) && size<12) size++;
+  emit(EOI);
+  if (bits>0) bytes.push(cur&255);
+  return bytes;
+}
+function encodeGif(w,h,frames,pal){
+  const out=[]; const u16=v=>{out.push(v&255,(v>>8)&255);};
+  for (const ch of 'GIF89a') out.push(ch.charCodeAt(0));
+  u16(w); u16(h); out.push(0xF7,0,0);
+  for (const c of pal) out.push(c[0],c[1],c[2]);
+  out.push(0x21,0xFF,0x0B); for (const ch of 'NETSCAPE2.0') out.push(ch.charCodeAt(0)); out.push(3,1,0,0,0);
+  for (const f of frames){
+    out.push(0x21,0xF9,4,0x04); u16(f.delay); out.push(0,0);
+    out.push(0x2C); u16(0); u16(0); u16(w); u16(h); out.push(0);
+    out.push(8); const data=lzw(f.ix);
+    for (let i=0;i<data.length;i+=255){ const n=Math.min(255,data.length-i); out.push(n); for(let j=0;j<n;j++) out.push(data[i+j]); }
+    out.push(0);
+  }
+  out.push(0x3B);
+  return new Uint8Array(out);
+}
+
+/* ---------- GIF card ---------- */
+function drawCard(ctx,W,H,t,s,bk){
+  ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  // badge
+  ctx.fillStyle=C.coral; ctx.beginPath(); ctx.arc(W-44,46,20,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#ffb3bb'; ctx.beginPath(); ctx.arc(W-50,40,6,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=C.text; ctx.font='600 28px Fredoka, sans-serif';
+  let nm=state.name; while (ctx.measureText(nm).width>W-110 && nm.length>3) nm=nm.slice(0,-2)+'…';
+  ctx.fillText(nm,24,52);
+  ctx.fillStyle=C.muted; ctx.font='700 15px Nunito, sans-serif';
+  ctx.fillText(RANGE_LABEL[range]+(mode==='total'?' · running total':'')+' · '+fmtDate(Date.now()),24,76);
+  const inRange=bk.reduce((a,b)=>a+b.n,0), e=ease(Math.min(1,t*1.15));
+  const tiles=[['Total',s.total,C.gold],[range==='all'?'Active days':'In range',range==='all'?(s.activeDays||0):inRange,C.text],
+    ['Daily avg',s.avg||0,C.text],['Streak',s.streak||0,C.mint]];
+  const tw=(W-48-30)/4;
+  tiles.forEach(([lab,val,col],i)=>{ const x=24+i*(tw+10), y=94;
+    ctx.fillStyle=C.well; rr(ctx,x,y,tw,76,14); ctx.fill(); ctx.strokeStyle=C.line; ctx.lineWidth=1; rr(ctx,x+.5,y+.5,tw-1,75,14); ctx.stroke();
+    let v=val*e; v = (lab==='Daily avg' && val<10) ? v.toFixed(1) : fmtN(v); if (lab==='Streak') v+='d';
+    ctx.textAlign='center'; ctx.fillStyle=col; ctx.font='600 26px Fredoka, sans-serif'; ctx.fillText(v,x+tw/2,y+40);
+    ctx.fillStyle=C.muted; ctx.font='700 13px Nunito, sans-serif'; ctx.fillText(lab,x+tw/2,y+62); });
+  ctx.fillStyle=C.well; rr(ctx,24,186,W-48,H-186-44,16); ctx.fill(); ctx.strokeStyle=C.line; rr(ctx,24.5,186.5,W-49,H-186-45,16); ctx.stroke();
+  drawChart(ctx,30,192,W-60,H-186-56,bk,mode,t,14);
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left'; ctx.fillStyle=C.muted; ctx.font='700 13px Nunito, sans-serif';
+  ctx.fillText('Curious Pirate Games',24,H-16);
+  ctx.textAlign='right'; ctx.fillStyle=C.gold; ctx.font='600 14px Fredoka, sans-serif';
+  ctx.fillText('THE BUTTON',W-24,H-16);
+}
+let gifBlob=null, gifUrl=null;
+async function makeGif(){
+  const btn=$('#makeGif'); btn.disabled=true; btn.textContent='Making…';
+  try{
+    try{ await Promise.all(['600 28px Fredoka','700 15px Nunito']. map(f=>document.fonts.load(f))); }catch(e){}
+    await new Promise(r=>setTimeout(r,30));
+    const W=480,H=520, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const ctx=cv.getContext('2d',{willReadFrequently:true});
+    const s=computeStats(), bk=buckets(range), pal=buildPalette(), cache=new Map(), frames=[];
+    const N=22;
+    for (let i=0;i<N;i++){
+      const t=i/(N-1); drawCard(ctx,W,H,t,s,bk);
+      frames.push({ix:indexFrame(ctx.getImageData(0,0,W,H),pal,cache), delay: i===N-1?450:5});
+      if (i%4===3) await new Promise(r=>setTimeout(r,0));
+    }
+    const bytes=encodeGif(W,H,frames,pal);
+    gifBlob=new Blob([bytes],{type:'image/gif'});
+    if (gifUrl) URL.revokeObjectURL(gifUrl);
+    gifUrl=URL.createObjectURL(gifBlob);
+    $('#gifImg').src=gifUrl; $('#gifOut').hidden=false;
+  } catch(e){ console.error(e); toast('Could not make the GIF'); }
+  btn.disabled=false; btn.textContent='Make GIF again';
+}
+$('#makeGif').addEventListener('click',makeGif);
+const gifName=()=> (state.name||'button').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-stats.gif';
+$('#dlGif').addEventListener('click',()=>{ if(!gifUrl) return; try{ const a=document.createElement('a'); a.href=gifUrl; a.download=gifName(); document.body.appendChild(a); a.click(); a.remove(); }catch(e){ toast('Long-press the GIF to save it'); } });
+$('#shareGif').addEventListener('click',async()=>{
+  if(!gifBlob) return;
+  try{ const f=new File([gifBlob],gifName(),{type:'image/gif'});
+    if (navigator.canShare && navigator.canShare({files:[f]})) { await navigator.share({files:[f]}); return; }
+    toast('Sharing not supported here — use Download'); }
+  catch(e){ if(e && e.name!=='AbortError') toast('Sharing not available — long-press the GIF'); }
+});
+
+/* ---------- backup codes ---------- */
+const b64u = bytes => { let s=''; bytes.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+const unb64u = str => { str=str.replace(/-/g,'+').replace(/_/g,'/'); while(str.length%4) str+='='; const s=atob(str); return Uint8Array.from(s,c=>c.charCodeAt(0)); };
+async function streamBytes(bytes,ctor){ const st=new Blob([bytes]).stream().pipeThrough(new ctor('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
+async function makeBackup(){
+  let prev=0; const deltas=state.presses.map(t=>{ const s=Math.round(t/1000), d=s-prev; prev=s; return d.toString(36); });
+  const json=JSON.stringify({v:1,n:state.name,p:deltas.join('.')});
+  const raw=new TextEncoder().encode(json);
+  try{ if (window.CompressionStream) return 'BTN-z'+b64u(await streamBytes(raw,CompressionStream)); }catch(e){}
+  return 'BTN-p'+b64u(raw);
+}
+async function readBackup(code){
+  code=code.trim().replace(/\s+/g,''); if (!code.startsWith('BTN-')) throw new Error('not a code');
+  const kind=code[4], body=unb64u(code.slice(5));
+  const bytes = kind==='z' ? await streamBytes(body,DecompressionStream) : body;
+  const o=JSON.parse(new TextDecoder().decode(bytes));
+  let acc=0; const presses = o.p ? o.p.split('.').map(x=>{ acc+=parseInt(x,36); return acc*1000; }) : [];
+  if (presses.some(n=>!isFinite(n))) throw new Error('bad');
+  return {name:o.n||'The Button', presses};
+}
+$('#copyBackup').addEventListener('click',async()=>copy(await makeBackup(),'Backup code copied'));
+let restoreArm=0;
+$('#restore').addEventListener('click',async()=>{
+  const code=$('#restoreIn').value; if(!code.trim()) return toast('Paste a code first');
+  let d; try{ d=await readBackup(code); }catch(e){ return toast("That code doesn't look right"); }
+  if (state.presses.length && Date.now()-restoreArm>4000){ restoreArm=Date.now(); $('#restore').textContent='Tap again to replace '+fmtN(state.presses.length)+' presses';
+    setTimeout(()=>$('#restore').textContent='Restore',4000); return; }
+  restoreArm=0; $('#restore').textContent='Restore';
+  try{ localStorage.setItem(KEY+':before-restore', JSON.stringify(state)); }catch(e){}
+  state.name=d.name; state.presses=d.presses.sort((a,b)=>a-b); save(); $('#nameIn').value=state.name; $('#restoreIn').value='';
+  renderAll(true); toast('Restored '+fmtN(d.presses.length)+' presses');
+});
+let resetArm=0;
+$('#reset').addEventListener('click',()=>{
+  if (Date.now()-resetArm>4000){ resetArm=Date.now(); $('#reset').textContent='Tap again to wipe everything'; setTimeout(()=>$('#reset').textContent='Reset all presses',4000); return; }
+  resetArm=0; try{ localStorage.setItem(KEY+':before-reset', JSON.stringify(state)); }catch(e){}
+  state.presses=[]; save(); $('#reset').textContent='Reset all presses'; renderAll(true); toast('All presses cleared');
+});
+$('#nameIn').addEventListener('input',e=>{ state.name=e.target.value.trim()||'The Button'; save(); renderStats(); });
+
+/* ---------- utils ---------- */
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200); }
+async function copy(text,msg){
+  try{ await navigator.clipboard.writeText(text); toast(msg); return; }catch(e){}
+  try{ const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand('copy'); ta.remove(); if(ok){ toast(msg); return; } }catch(e){}
+  toast('Copy blocked — select the text and copy it manually');
+}
+
+/* ---------- start ---------- */
+load();
+$('#nameIn').value = state.name==='The Button' ? '' : state.name;
+renderAll(true);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>renderChart(false));
+</script>
+</body>
+</html>
